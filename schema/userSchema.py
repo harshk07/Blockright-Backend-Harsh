@@ -79,19 +79,17 @@ def post_userLogin(data):
 
     allowed_wallet_types = ["metamask", "coinbase", "trust wallet", "wallet connect"]
     if data["walletType"].lower() in allowed_wallet_types:
-        # ... (existing code)
-
-        # Insert a new user only if the user doesn't exist
+        filtered_nfts = [nft for nft in Nfts if nft.get("cached_file_url") is not None]
         new_user = {
             "createdAt": datetime.now(),
             "nftProcessed": False,
             "dmActive": False,
             "nftCollection": filtered_nfts,
-            "refferaID": secrets.token_hex(6),
+            "refferaID": secrets.token_hex(6)
         }
         data.update(new_user)
         user.insert_one(data)
-
+        
         nft_data = {
             "userID": str(data["_id"]),
             "walletAddress": data["walletAddress"],
@@ -100,17 +98,17 @@ def post_userLogin(data):
                 "tshirt": None,
                 "cap": None,
                 "hoodie": None,
-                "cup": None,
+                "cup": None
             },
             "lastSyncedOn": None,
             "isOwned": True,
-            "isAdminVerified": False,
+            "isAdminVerified": False
         }
         nft.insert_one(nft_data)
         message = "Login Created Successfully"
         user_id = str(data["_id"])
         nft_id = str(nft_data["_id"])
-        response = {"message": message, "walletId": user_id, "nftId": nft_id}
+        response = {"message": message, "walletId": user_id,"nftId":nft_id}
         return response
     else:
         return "Invalid Wallet Type"

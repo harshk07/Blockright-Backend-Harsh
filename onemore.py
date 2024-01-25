@@ -5,12 +5,12 @@ wallet_address = input("Enter wallet address: ")
 api_key = "b7fb531b-40ef-4855-bcb0-56ff6374948f"
 
 # Define the API endpoint URL
-url = f"https://api.nftport.xyz/v0/accounts/{wallet_address}?chain=polygon"
+url = f"https://api.nftport.xyz/v0/accounts/{wallet_address}?chain=ethereum"
 
 # Define headers with the Authorization header
 headers = {
     "Authorization": api_key,
-    "Content-Type": "application/json"
+    "accept": "application/json"
 }
 
 # Make a GET request with streaming
