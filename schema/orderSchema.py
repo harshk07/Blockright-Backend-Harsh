@@ -26,13 +26,16 @@ def post_orderEcommerce(data):
                 "color": product_data.color,
                 "size": product_data.size,
                 "verificationId": product_data.verificationId,
+                "totalAmount": product_data.quantity * product_data.price,
             }
             for product_data in data_dict.pop("products")
         ]
 
         order.insert_one(data_dict)
 
-        return "Order Pending, Proceed for Payment"
+        total_amount = sum(item["totalAmount"] for item in data_dict["orderedProducts"])
+
+        return f"Order Pending, Proceed for Payment. Total Amount: {total_amount}"
     else:
         return "Please enter a 10-digit mobile number"
 

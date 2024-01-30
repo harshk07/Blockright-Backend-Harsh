@@ -3,7 +3,7 @@ from typing import List
 
 class OrderItemModel(BaseModel):
     productImage:str
-    price:str
+    price:float
     quantity: int
     color: str
     size: str
