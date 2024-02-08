@@ -85,11 +85,11 @@ def post_userLogin(data):
             "nftProcessed": False,
             "dmActive": False,
             "nftCollection": filtered_nfts,
-            "refferaID": secrets.token_hex(6)
+            "refferaID": secrets.token_hex(6),
         }
         data.update(new_user)
         user.insert_one(data)
-        
+
         nft_data = {
             "userID": str(data["_id"]),
             "walletAddress": data["walletAddress"],
@@ -98,17 +98,17 @@ def post_userLogin(data):
                 "tshirt": None,
                 "cap": None,
                 "hoodie": None,
-                "cup": None
+                "cup": None,
             },
             "lastSyncedOn": None,
             "isOwned": True,
-            "isAdminVerified": False
+            "isAdminVerified": False,
         }
         nft.insert_one(nft_data)
         message = "Login Created Successfully"
         user_id = str(data["_id"])
         nft_id = str(nft_data["_id"])
-        response = {"message": message, "walletId": user_id,"nftId":nft_id}
+        response = {"message": message, "walletId": user_id, "nftId": nft_id}
         return response
     else:
         return "Invalid Wallet Type"
@@ -117,10 +117,14 @@ def post_userLogin(data):
 def get_userRights(id):
     from config.db import rights
 
-    # user_data = rights.find_one({"walletId": str(id)})
-    # if user_data:
     user_data_cursor = rights.find({"walletId": str(id)})
     user_rights_list = []
+    
+    # Initialize the variables outside the loop
+    cap_info = {}
+    tshirt_info = {}
+    hoodie_info = {}
+    mug_info = {}
 
     for user_data in user_data_cursor:
         wallet = user_data["walletId"]
@@ -136,7 +140,7 @@ def get_userRights(id):
         hoodie_rights_given = hoodie_rights.get("rightsGiven", False)
         mug_rights_given = mug_rights.get("rightsGiven", False)
 
-        cap_info = {}
+        # Update the variables only if corresponding data is available
         if cap_rights_given:
             cap_info = {
                 "merchantQuantity": cap_rights.get("merchantQuantity", 0),
@@ -147,7 +151,6 @@ def get_userRights(id):
                 "licenseDate": cap_rights.get("licenseDate", ""),
             }
 
-        tshirt_info = {}
         if tshirt_rights_given:
             tshirt_info = {
                 "merchantQuantity": tshirt_rights.get("merchantQuantity", 0),
@@ -158,7 +161,6 @@ def get_userRights(id):
                 "licenseDate": tshirt_rights.get("licenseDate", ""),
             }
 
-        hoodie_info = {}
         if hoodie_rights_given:
             hoodie_info = {
                 "merchantQuantity": hoodie_rights.get("merchantQuantity", 0),
@@ -169,7 +171,6 @@ def get_userRights(id):
                 "licenseDate": hoodie_rights.get("licenseDate", ""),
             }
 
-        mug_info = {}
         if mug_rights_given:
             mug_info = {
                 "merchantQuantity": mug_rights.get("merchantQuantity", 0),
@@ -189,13 +190,18 @@ def get_userRights(id):
             "hoodieRights": hoodie_info,
             "mugRights": mug_info,
         }
-        # return response
+
         user_rights_list.append(user_rights)
-    if len(user_rights_list) != 0:
+
+    all_rights_empty = all(
+        [not cap_info, not tshirt_info, not hoodie_info, not mug_info]
+    )
+    if all_rights_empty:
+        return {"message": "No rights approved"}
+    elif len(user_rights_list) != 0:
         return user_rights_list
     else:
-        return "User Rights not found"
-
+        return {"message": "User Rights not found"}
 
 def get_product_detail(id, prod, search):
     from config.db import user, product
