@@ -1,4 +1,13 @@
 from pydantic import BaseModel
+from typing import List
+
+class OrderItemModel(BaseModel):
+    productImage:str
+    price:float
+    quantity: int
+    color: str
+    size: str
+    verificationId: str
 
 
 class OrderModel(BaseModel):
@@ -8,20 +17,6 @@ class OrderModel(BaseModel):
     userMobile: int
     city: str
     country: str
-    actress: str
+    address: str
     pin: int
-    
-    products: dict ={
-        "productImage":"",
-        "quantity":0,
-        "color":"",
-        "size":"",
-        "quality":"",
-        "verificationId":""
-        # printingStatus
-    }
-    
-    # orderAmount: Check
-    # orderStatus: Pending
-    # paymentStats: Pending
-    # paymentID: NULL
+    products: List[OrderItemModel]
