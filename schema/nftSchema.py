@@ -272,16 +272,18 @@ def get_Nft(userID):
     from config.db import nft
 
     lst = []
-    data = nft.find_one({"userID": userID})
-    if data:
-        for i in data["nftMetaData"]:
-            # i["_id"]=str(i["_id"])
-            # i["userID"]=str(i["userID"])
+    cursor = nft.find({"userID": userID})
 
-            lst.append(Nft_filter_schema(i))
+    for data in cursor:
+        nft_metadata = data["nftMetaData"]
+        if nft_metadata:
+            nft_metadata["_id"] = str(data["_id"])
+            lst.append(nft_metadata)
+
+    if lst:
         return lst
     else:
-        return "Invalid NFT ID"
+        return "No NFTs found for the given user ID"
 
 
 def Nft_filter_schema(item):
