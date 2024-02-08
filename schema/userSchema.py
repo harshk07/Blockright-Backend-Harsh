@@ -85,11 +85,11 @@ def post_userLogin(data):
             "nftProcessed": False,
             "dmActive": False,
             "nftCollection": filtered_nfts,
-            "refferaID": secrets.token_hex(6)
+            "refferaID": secrets.token_hex(6),
         }
         data.update(new_user)
         user.insert_one(data)
-        
+
         nft_data = {
             "userID": str(data["_id"]),
             "walletAddress": data["walletAddress"],
@@ -98,17 +98,17 @@ def post_userLogin(data):
                 "tshirt": None,
                 "cap": None,
                 "hoodie": None,
-                "cup": None
+                "cup": None,
             },
             "lastSyncedOn": None,
             "isOwned": True,
-            "isAdminVerified": False
+            "isAdminVerified": False,
         }
         nft.insert_one(nft_data)
         message = "Login Created Successfully"
         user_id = str(data["_id"])
         nft_id = str(nft_data["_id"])
-        response = {"message": message, "walletId": user_id,"nftId":nft_id}
+        response = {"message": message, "walletId": user_id, "nftId": nft_id}
         return response
     else:
         return "Invalid Wallet Type"
@@ -191,7 +191,13 @@ def get_userRights(id):
         }
         # return response
         user_rights_list.append(user_rights)
-    if len(user_rights_list) != 0:
+
+    all_rights_empty = all(
+        [not cap_info, not tshirt_info, not hoodie_info, not mug_info]
+    )
+    if all_rights_empty:
+        return {"message": "No rights approved"}
+    elif len(user_rights_list) != 0:
         return user_rights_list
     else:
         return "User Rights not found"
