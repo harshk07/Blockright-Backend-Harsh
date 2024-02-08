@@ -79,36 +79,37 @@ def post_userLogin(data):
 
     allowed_wallet_types = ["metamask", "coinbase", "trust wallet", "wallet connect"]
     if data["walletType"].lower() in allowed_wallet_types:
-        filtered_nfts = [nft for nft in Nfts if nft.get("cached_file_url") is not None]
         new_user = {
             "createdAt": datetime.now(),
             "nftProcessed": False,
             "dmActive": False,
-            "nftCollection": filtered_nfts,
             "refferaID": secrets.token_hex(6),
         }
         data.update(new_user)
-        user.insert_one(data)
+        user_id = user.insert_one(data).inserted_id
 
-        nft_data = {
-            "userID": str(data["_id"]),
-            "walletAddress": data["walletAddress"],
-            "nftMetaData": filtered_nfts,
-            "rightAllocated": {
-                "tshirt": None,
-                "cap": None,
-                "hoodie": None,
-                "cup": None,
-            },
-            "lastSyncedOn": None,
-            "isOwned": True,
-            "isAdminVerified": False,
-        }
-        nft.insert_one(nft_data)
+        nft_ids = []
+        for nft_metadata in Nfts:
+            if nft_metadata.get("cached_file_url") is not None:
+                nft_doc = {
+                    "userID": str(user_id),
+                    "walletAddress": data["walletAddress"],
+                    "nftMetaData": nft_metadata,
+                    "rightAllocated": {
+                        "tshirt": None,
+                        "cap": None,
+                        "hoodie": None,
+                        "cup": None,
+                    },
+                    "lastSyncedOn": None,
+                    "isOwned": True,
+                    "isAdminVerified": False,
+                }
+                nft_id = nft.insert_one(nft_doc).inserted_id
+                nft_ids.append(str(nft_id))
+
         message = "Login Created Successfully"
-        user_id = str(data["_id"])
-        nft_id = str(nft_data["_id"])
-        response = {"message": message, "walletId": user_id, "nftId": nft_id}
+        response = {"message": message, "walletId": str(user_id), "nftIds": nft_ids}
         return response
     else:
         return "Invalid Wallet Type"
@@ -119,7 +120,7 @@ def get_userRights(id):
 
     user_data_cursor = rights.find({"walletId": str(id)})
     user_rights_list = []
-    
+
     # Initialize the variables outside the loop
     cap_info = {}
     tshirt_info = {}
@@ -202,6 +203,7 @@ def get_userRights(id):
         return user_rights_list
     else:
         return {"message": "User Rights not found"}
+
 
 def get_product_detail(id, prod, search):
     from config.db import user, product
