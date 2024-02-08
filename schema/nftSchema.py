@@ -12,22 +12,21 @@ from fastapi import HTTPException
 import secrets
 
 
-def post_CreateDRM(data: rightsModel):
-    data = data.dict()
+def post_CreateDRM(data):
+    data = data.dict()  # Assuming data is a dictionary or object with a dict() method
 
     # Check for valid user using Wallet ID
-    if not user.find_one({"_id": ObjectId(data["walletId"])}):
+    if not user.find_one({"_id": ObjectId(data.get("walletId"))}):
         return "Invalid Wallet ID"
 
     # Check if NFT is there or not
-    if not nft.find_one({"_id": ObjectId(data["nftId"])}):
+    if not nft.find_one({"_id": ObjectId(data.get("nftId"))}):
         return "Invalid NFT ID"
 
     # Checks for user License Condition
-    if data["userLicenseCondition"] not in ["Copyright", "C BY", "CC BY-SA"]:
+    valid_license_conditions = ["Copyright", "C BY", "CC BY-SA"]
+    if data.get("userLicenseCondition") not in valid_license_conditions:
         return "Please enter a valid license Condition"
-
-    license_conditions = ["", "Negotiable", "Non-Negotiable"]
 
     # Check user license conditions for each category
     categories = ["capRights", "tshirtRights", "hoodieRights", "mugRights"]
@@ -37,46 +36,47 @@ def post_CreateDRM(data: rightsModel):
 
     if rights_exists is not None:
         allocated_categories = []
-        for Category_rights in categories:
-            if data[Category_rights]["merchantQuantity"] == "":
-                data[Category_rights]["merchantQuantity"] = 0
-            if rights_exists[Category_rights]["merchantQuantity"] == "":
-                rights_exists[Category_rights]["merchantQuantity"] = 0
+        for category in categories:
+            if data.get(category, {}).get("merchantQuantity", "") == "":
+                data[category]["merchantQuantity"] = 0
+            if rights_exists.get(category, {}).get("merchantQuantity", "") == "":
+                rights_exists[category]["merchantQuantity"] = 0
             if (
-                int(data[Category_rights]["merchantQuantity"]) > 0
-                and int(rights_exists[Category_rights]["merchantQuantity"]) > 0
+                int(data[category]["merchantQuantity"]) > 0
+                and int(rights_exists[category]["merchantQuantity"]) > 0
             ):
-                allocated_categories.append(Category_rights)
+                allocated_categories.append(category)
 
         if allocated_categories:
             return f"Rights already allocated for categories: {', '.join(allocated_categories)}"
 
         for category in categories:
-            if category not in data:
-                continue  # Skip this category if it's not entered correctly
+            category_data = data.get(category)
+            if not category_data:
+                continue
 
-            # Check if the category has the merchLicenseCondition key
-            if "merchLicenseCondition" not in data[category]:
-                continue  # Skip this category if the license condition is missing
+            merch_license_condition = category_data.get("merchLicenseCondition")
+            if not merch_license_condition:
+                continue
 
-            if data[category]["merchLicenseCondition"] not in license_conditions:
+            if merch_license_condition not in ["", "Negotiable", "Non-Negotiable"]:
                 return f"Please enter valid {category} Merch license Condition"
 
-            merchant_quantity_str = data[category].get("merchantQuantity", "")
+            merchant_quantity_str = category_data.get("merchantQuantity", "")
             if merchant_quantity_str:
                 merchant_quantity = int(merchant_quantity_str)
                 if not (100 <= merchant_quantity <= 1000):
                     return f"Please select quantity between 100 and 1000 for {category}"
             else:
-                data[category]["merchantQuantity"] = 0
+                category_data["merchantQuantity"] = 0
 
-            if int(data[category]["merchantQuantity"]) > 0:
-                data[category]["rightsGiven"] = False
+            if int(category_data["merchantQuantity"]) > 0:
+                category_data["rightsGiven"] = False
 
             if rights_exists[category]["merchantQuantity"] == "":
-                rights_exists[category] = data[category]
+                rights_exists[category] = category_data
             if rights_exists[category]["merchantQuantity"] == 0:
-                rights_exists[category] = data[category]
+                rights_exists[category] = category_data
 
         # Update the data into the database
         update_info = rights.update_one(
@@ -86,31 +86,32 @@ def post_CreateDRM(data: rightsModel):
 
     # Only insert into the database if at least one category or single data is valid
     any_category_valid = any(
-        data[category]["merchLicenseCondition"] in license_conditions
+        data.get(category, {}).get("merchLicenseCondition")
+        in ["Negotiable", "Non-Negotiable"]
         for category in categories
     )
 
     if any_category_valid:
         # Insert data into the database
-        rights.insert_one(data)
+        inserted_id = rights.insert_one(data).inserted_id
 
         # Update the inserted data
         rights.update_one(
-            {"_id": data["_id"]},
+            {"_id": inserted_id},
             {
                 "$set": {
                     "capRights.drmNumber": secrets.token_hex(8),
                     "tshirtRights.drmNumber": secrets.token_hex(8),
                     "hoodieRights.drmNumber": secrets.token_hex(8),
                     "mugRights.drmNumber": secrets.token_hex(8),
-                    "isAdminVerified": bool(False),
+                    "isAdminVerified": False,
                 }
             },
         )
 
         return "Rights Requested"
 
-    return "Please enter valid data for at least one category or single data"
+    return "Please enter valid data for at least one category or single data"
 
 
 def get_nftRightsRequest():
