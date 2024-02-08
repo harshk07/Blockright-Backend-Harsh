@@ -22,9 +22,13 @@ def post_orderEcommerce(data):
         # Rename the key to avoid conflicts
         data_dict["orderedProducts"] = [
             {
+                "productId": product_data.productId,
+                "productTitle": product_data.productTitle,
+                "productImg": product_data.productImage,
+                "price": product_data.price,
                 "quantity": product_data.quantity,
-                "color": product_data.color,
                 "size": product_data.size,
+                "color": product_data.color,
                 "verificationId": product_data.verificationId,
                 "totalAmount": product_data.quantity * product_data.price,
             }
