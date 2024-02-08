@@ -1,17 +1,19 @@
 from pydantic import BaseModel
 from typing import List
 
+
 class OrderItemModel(BaseModel):
-    productImage:str
-    price:float
+    productId: str
+    productTitle: str
+    productImage: str
+    price: float
     quantity: int
-    color: str
     size: str
+    color: str
     verificationId: str
 
 
 class OrderModel(BaseModel):
-    userId: str
     userName: str
     userEmail: str
     userMobile: int
