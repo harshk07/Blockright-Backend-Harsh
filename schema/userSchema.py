@@ -117,10 +117,14 @@ def post_userLogin(data):
 def get_userRights(id):
     from config.db import rights
 
-    # user_data = rights.find_one({"walletId": str(id)})
-    # if user_data:
     user_data_cursor = rights.find({"walletId": str(id)})
     user_rights_list = []
+    
+    # Initialize the variables outside the loop
+    cap_info = {}
+    tshirt_info = {}
+    hoodie_info = {}
+    mug_info = {}
 
     for user_data in user_data_cursor:
         wallet = user_data["walletId"]
@@ -136,7 +140,7 @@ def get_userRights(id):
         hoodie_rights_given = hoodie_rights.get("rightsGiven", False)
         mug_rights_given = mug_rights.get("rightsGiven", False)
 
-        cap_info = {}
+        # Update the variables only if corresponding data is available
         if cap_rights_given:
             cap_info = {
                 "merchantQuantity": cap_rights.get("merchantQuantity", 0),
@@ -147,7 +151,6 @@ def get_userRights(id):
                 "licenseDate": cap_rights.get("licenseDate", ""),
             }
 
-        tshirt_info = {}
         if tshirt_rights_given:
             tshirt_info = {
                 "merchantQuantity": tshirt_rights.get("merchantQuantity", 0),
@@ -158,7 +161,6 @@ def get_userRights(id):
                 "licenseDate": tshirt_rights.get("licenseDate", ""),
             }
 
-        hoodie_info = {}
         if hoodie_rights_given:
             hoodie_info = {
                 "merchantQuantity": hoodie_rights.get("merchantQuantity", 0),
@@ -169,7 +171,6 @@ def get_userRights(id):
                 "licenseDate": hoodie_rights.get("licenseDate", ""),
             }
 
-        mug_info = {}
         if mug_rights_given:
             mug_info = {
                 "merchantQuantity": mug_rights.get("merchantQuantity", 0),
@@ -189,7 +190,7 @@ def get_userRights(id):
             "hoodieRights": hoodie_info,
             "mugRights": mug_info,
         }
-        # return response
+
         user_rights_list.append(user_rights)
 
     all_rights_empty = all(
@@ -200,8 +201,7 @@ def get_userRights(id):
     elif len(user_rights_list) != 0:
         return user_rights_list
     else:
-        return "User Rights not found"
-
+        return {"message": "User Rights not found"}
 
 def get_product_detail(id, prod, search):
     from config.db import user, product
