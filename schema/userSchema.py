@@ -124,6 +124,7 @@ def get_userRights(id):
     for user_data in user_data_cursor:
         wallet = user_data["walletId"]
         userLicense_condition = user_data["userLicenseCondition"]
+        nft_id=user_data["nftId"]
 
         # Initialize variables inside the loop
         cap_info = {}
