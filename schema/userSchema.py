@@ -121,15 +121,15 @@ def get_userRights(id):
     user_data_cursor = rights.find({"walletId": str(id)})
     user_rights_list = []
 
-    # Initialize the variables outside the loop
-    cap_info = {}
-    tshirt_info = {}
-    hoodie_info = {}
-    mug_info = {}
-
     for user_data in user_data_cursor:
         wallet = user_data["walletId"]
         userLicense_condition = user_data["userLicenseCondition"]
+
+        # Initialize variables inside the loop
+        cap_info = {}
+        tshirt_info = {}
+        hoodie_info = {}
+        mug_info = {}
 
         cap_rights = user_data.get("capRights", {})
         tshirt_rights = user_data.get("tshirtRights", {})
