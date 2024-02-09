@@ -5,7 +5,7 @@ import secrets
 
 
 def post_adminProduct(id, data):
-    from config.db import product, admin, nft
+    from config.db import product, admin, nft, user
 
     data = dict(data)
 
@@ -13,7 +13,8 @@ def post_adminProduct(id, data):
     if admin.find_one({"_id": ObjectId(id)}):
         # Check if nft is there or not
         nftData = nft.find_one({"_id": ObjectId(data["nftId"])})
-        if nftData:
+        walletId = user.find_one({"_id": ObjectId(data["walletId"])})
+        if nftData and walletId:
             product.insert_one(data)
 
             product.update_one(
@@ -36,7 +37,7 @@ def post_adminProduct(id, data):
 
 
 def get_allProducts(id):
-    from config.db import admin, product,nft
+    from config.db import admin, product, nft
 
     lst = []
     # Check id admin is there or not
