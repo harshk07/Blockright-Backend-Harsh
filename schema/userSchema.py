@@ -185,6 +185,7 @@ def get_userRights(id):
         user_rights = {
             "walletId": wallet,
             "userLicenseCondition": userLicense_condition,
+            "nftId": nft_id,
             "imgSrc": user_data["imgSrc"],
             "capRights": cap_info,
             "tshirtRights": tshirt_info,
