@@ -124,7 +124,7 @@ def get_userRights(id):
     for user_data in user_data_cursor:
         wallet = user_data["walletId"]
         userLicense_condition = user_data["userLicenseCondition"]
-        nft_id=user_data["nftId"]
+        nft_id = user_data["nftId"]
 
         # Initialize variables inside the loop
         cap_info = {}
@@ -194,17 +194,21 @@ def get_userRights(id):
             "mugRights": mug_info,
         }
 
-        user_rights_list.append(user_rights)
+        # Append user rights only if at least one right is given
+        if any(
+            [
+                cap_rights_given,
+                tshirt_rights_given,
+                hoodie_rights_given,
+                mug_rights_given,
+            ]
+        ):
+            user_rights_list.append(user_rights)
 
-    all_rights_empty = all(
-        [not cap_info, not tshirt_info, not hoodie_info, not mug_info]
-    )
-    if all_rights_empty:
+    if len(user_rights_list) == 0:
         return {"message": "No rights approved"}
-    elif len(user_rights_list) != 0:
-        return user_rights_list
     else:
-        return {"message": "User Rights not found"}
+        return user_rights_list
 
 
 def get_product_detail(id, prod, search):
