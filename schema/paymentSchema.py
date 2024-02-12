@@ -84,6 +84,7 @@ def get_transactionDetails(walletAddress):
                         address = eachOrder["address"]
                         country = eachOrder["country"]
                         time = eachOrder["createdAt"]
+                        price = int(thatProduct["price"]) * quantity
 
                         transaction_dict.update(
                             {
@@ -93,6 +94,7 @@ def get_transactionDetails(walletAddress):
                                 "address": address,
                                 "country": country,
                                 "time": time,
+                                "price": price,
                             }
                         )
 
