@@ -14,7 +14,7 @@ def post_userPayment(data):
         if thatOrder["paymentStatus"] != "confirmed":
             order.update_one(
                 {"_id": ObjectId(data_dict["orderId"])},
-                {"$set": {"paymentStatus": "confirmed"}},
+                {"$set": {"paymentStatus": "confirmed", "orderStatus": "placed"}},
             )
 
             for eachProduct in thatOrder["orderedProducts"]:
@@ -41,7 +41,9 @@ def post_userPayment(data):
                         + "does not exist"
                     )
 
-            response = "Payment status is set to completed"
+            response = (
+                "Payment status is set to completed and Order status is set to placed"
+            )
             print(response)
             return response
         else:
