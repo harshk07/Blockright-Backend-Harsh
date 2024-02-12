@@ -27,8 +27,8 @@ def post_userPayment(data):
                         {"_id": ObjectId(eachProduct["productId"])},
                         {
                             "$set": {
-                                "totalQuantity": (
-                                    thatProduct["totalQuantity"]
+                                "availableQuantity": (
+                                    thatProduct["availableQuantity"]
                                     - eachProduct["quantity"]
                                 )
                             }
