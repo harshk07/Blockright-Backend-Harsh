@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
+
 class PaymentModel(BaseModel):
-    userId: str
+    # userId: str
     orderId: str
-    amount: float
+    # amount: float
