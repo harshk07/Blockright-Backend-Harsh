@@ -141,7 +141,13 @@ def get_nftSpecificRightsRequest(wallet_id):
                 capRights.get("rightsGiven", False) is False
                 and capRights.get("licenseFees", 0) > 0
             ):
-                lst.append({"nftId": eachRight.get("nftId"), "capRights": capRights})
+                lst.append(
+                    {
+                        "imgSrc": eachRight["imgSrc"],
+                        "nftId": eachRight.get("nftId"),
+                        "capRights": capRights,
+                    }
+                )
 
             # Check tshirtRights
             tshirtRights = eachRight.get("tshirtRights", {})
@@ -150,7 +156,11 @@ def get_nftSpecificRightsRequest(wallet_id):
                 and tshirtRights.get("licenseFees", 0) > 0
             ):
                 lst.append(
-                    {"nftId": eachRight.get("nftId"), "tshirtRights": tshirtRights}
+                    {
+                        "imgSrc": eachRight["imgSrc"],
+                        "nftId": eachRight.get("nftId"),
+                        "tshirtRights": tshirtRights,
+                    }
                 )
 
             # Check hoodieRights
@@ -160,7 +170,11 @@ def get_nftSpecificRightsRequest(wallet_id):
                 and hoodieRights.get("licenseFees", 0) > 0
             ):
                 lst.append(
-                    {"nftId": eachRight.get("nftId"), "hoodieRights": hoodieRights}
+                    {
+                        "imgSrc": eachRight["imgSrc"],
+                        "nftId": eachRight.get("nftId"),
+                        "hoodieRights": hoodieRights,
+                    }
                 )
 
             # Check mugRights
@@ -169,7 +183,13 @@ def get_nftSpecificRightsRequest(wallet_id):
                 mugRights.get("rightsGiven", False) is False
                 and mugRights.get("licenseFees", 0) > 0
             ):
-                lst.append({"nftId": eachRight.get("nftId"), "mugRights": mugRights})
+                lst.append(
+                    {
+                        "imgSrc": eachRight["imgSrc"],
+                        "nftId": eachRight.get("nftId"),
+                        "mugRights": mugRights,
+                    }
+                )
 
         return lst
     else:
