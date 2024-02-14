@@ -106,6 +106,4 @@ def get_transactionDetails(walletAddress):
                     transactionList.append(transaction_dict)
                 totalEarned += orderEarned
 
-    transactionList.append({"Earned": totalEarned})
-
-    return transactionList
+    return {"transactionList": transactionList, "earned": totalEarned}
