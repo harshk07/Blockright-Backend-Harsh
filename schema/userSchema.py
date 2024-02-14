@@ -3,6 +3,7 @@ import json
 import requests
 from datetime import datetime, date
 import secrets
+from config.db import payment, user, order, product
 
 # def post_userLogin(data):
 #     from config.db import user, nft
@@ -143,7 +144,15 @@ def get_userRights(id):
         mug_rights_given = mug_rights.get("rightsGiven", False)
 
         # Update the variables only if corresponding data is available
+        print("Hello")
         if cap_rights_given:
+            AvailableQuantity = product.find_one(
+                {"nftId": str(nft_id), "category": "cap"}
+            )
+            if not AvailableQuantity:
+                AvailableQuantity = {}
+            # capAvailableQuantity["_id"] = str(capAvailableQuantity["_id"])
+            # print(capAvailableQuantity)
             cap_info = {
                 "merchantQuantity": cap_rights.get("merchantQuantity", 0),
                 "merchTitle": cap_rights.get("merchTitle", ""),
@@ -151,9 +160,15 @@ def get_userRights(id):
                 "merchLicenseCondition": cap_rights.get("merchLicenseCondition", ""),
                 "licenseTerm": cap_rights.get("licenseTerm", ""),
                 "licenseDate": cap_rights.get("licenseDate", ""),
+                "availableQuantity": AvailableQuantity.get("availableQuantity"),
             }
 
         if tshirt_rights_given:
+            AvailableQuantity = product.find_one(
+                {"nftId": str(nft_id), "category": "tshirt"}
+            )
+            if not AvailableQuantity:
+                AvailableQuantity = {}
             tshirt_info = {
                 "merchantQuantity": tshirt_rights.get("merchantQuantity", 0),
                 "merchTitle": tshirt_rights.get("merchTitle", ""),
@@ -161,9 +176,15 @@ def get_userRights(id):
                 "merchLicenseCondition": tshirt_rights.get("merchLicenseCondition", ""),
                 "licenseTerm": tshirt_rights.get("licenseTerm", ""),
                 "licenseDate": tshirt_rights.get("licenseDate", ""),
+                "availableQuantity": AvailableQuantity.get("availableQuantity"),
             }
 
         if hoodie_rights_given:
+            AvailableQuantity = product.find_one(
+                {"nftId": str(nft_id), "category": "hoodie"}
+            )
+            if not AvailableQuantity:
+                AvailableQuantity = {}
             hoodie_info = {
                 "merchantQuantity": hoodie_rights.get("merchantQuantity", 0),
                 "merchTitle": hoodie_rights.get("merchTitle", ""),
@@ -171,9 +192,15 @@ def get_userRights(id):
                 "merchLicenseCondition": hoodie_rights.get("merchLicenseCondition", ""),
                 "licenseTerm": hoodie_rights.get("licenseTerm", ""),
                 "licenseDate": hoodie_rights.get("licenseDate", ""),
+                "availableQuantity": AvailableQuantity.get("availableQuantity"),
             }
 
         if mug_rights_given:
+            AvailableQuantity = product.find_one(
+                {"nftId": str(nft_id), "category": "mug"}
+            )
+            if not AvailableQuantity:
+                AvailableQuantity = {}
             mug_info = {
                 "merchantQuantity": mug_rights.get("merchantQuantity", 0),
                 "merchTitle": mug_rights.get("merchTitle", ""),
@@ -181,6 +208,7 @@ def get_userRights(id):
                 "merchLicenseCondition": mug_rights.get("merchLicenseCondition", ""),
                 "licenseTerm": mug_rights.get("licenseTerm", ""),
                 "licenseDate": mug_rights.get("licenseDate", ""),
+                "availableQuantity": AvailableQuantity.get("availableQuantity"),
             }
 
         user_rights = {

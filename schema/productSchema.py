@@ -81,6 +81,7 @@ def patch_products(idA, idP, data):
                 if field not in document.keys():
                     return f"Invalid Field: {field}"
                 product.update_one({"_id": ObjectId(idP)}, {"$set": dict(data)})
+                # rights.update_one({"_id": })
                 return "Product Detail Updated Successfully"
 
             # else:
