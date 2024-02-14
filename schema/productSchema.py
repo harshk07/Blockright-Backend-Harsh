@@ -5,18 +5,21 @@ import secrets
 
 
 def post_adminProduct(id, data):
-    from config.db import product, admin, nft, user
+    from config.db import product, admin, nft, user, rights
 
     data = dict(data)
 
-    # Check id admin is there or not
+    # Check if admin is there or not
     if admin.find_one({"_id": ObjectId(id)}):
         # Check if nft is there or not
         nftData = nft.find_one({"_id": ObjectId(data["nftId"])})
         walletId = user.find_one({"_id": ObjectId(data["walletId"])})
+
         if nftData and walletId:
+            # Insert the new product
             product.insert_one(data)
 
+            # Update the product with additional fields
             product.update_one(
                 {"_id": ObjectId(data["_id"])},
                 {
@@ -28,8 +31,18 @@ def post_adminProduct(id, data):
                     }
                 },
             )
-            return "Product added successfully"
 
+            # Update rights document based on nftId
+            nft_id = data.get("nftId")
+            category = data.get("category")
+            if nft_id and category:
+                rights_field = f"{category.lower()}Rights"
+                rights.update_one(
+                    {"nftId": nft_id},
+                    {"$set": {f"{rights_field}.productId": str(data["_id"])}},
+                )
+
+            return "Product added successfully"
         else:
             return "Invalid NFT ID"
     else:
