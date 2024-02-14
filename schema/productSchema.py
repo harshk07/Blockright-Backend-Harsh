@@ -56,8 +56,24 @@ def get_allProducts(id):
         return "Invalid Admin Id"
 
 
-def patch_products(idA, idP, data):
+def get_product_by_id(product_id):
+    # Check if the provided ID is a valid ObjectId
     from config.db import product, admin
+
+    if not product.find_one({"_id": ObjectId(product_id)}):
+        raise HTTPException(status_code=400, detail="Invalid product ID")
+
+    product_doc = product.find_one({"_id": ObjectId(product_id)})
+    if product_doc:
+        # Convert ObjectId to string
+        product_doc["_id"] = str(product_doc["_id"])
+        return product_doc
+    else:
+        return None
+
+
+def patch_products(idA, idP, data):
+    from config.db import product, admin, rights
 
     # Check id admin is there or not
     if admin.find_one({"_id": ObjectId(idA)}):
@@ -67,16 +83,6 @@ def patch_products(idA, idP, data):
         # Check if Product is there or not
         document = product.find_one({"_id": ObjectId(idP)})
         if document:
-            # Only certain values can be patched
-            # if (
-            #     "category" in data
-            #     or "images" in data
-            #     or "price" in data
-            #     or "currency" in data
-            #     or "discount" in data
-            #     or "isPublished" in data
-            #     or "lastDate" in data
-            # ):
             for field in data.keys():
                 if field not in document.keys():
                     return f"Invalid Field: {field}"
