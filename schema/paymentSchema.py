@@ -61,10 +61,12 @@ def patch_adminPayment(idA, idP, data):
 def get_transactionDetails(walletAddress):
     allOrders = order.find()
     transactionList = []
+    totalEarned = 0
     for eachOrder in allOrders:
         if eachOrder["paymentStatus"] == "confirmed":
-            for eachOrderedProduct in eachOrder["orderedProducts"]:
-                getProductId = eachOrderedProduct["productId"]
+            orderEarned = 0
+            for eachItem in eachOrder["orderedProducts"]:
+                getProductId = eachItem["productId"]
                 print("product Id: " + str(getProductId))
 
                 # check if this productId matches with the product document
@@ -74,32 +76,36 @@ def get_transactionDetails(walletAddress):
                 thatProduct = product.find_one(
                     {"walletAddress": walletAddress, "_id": ObjectId(getProductId)}
                 )
-                print(thatProduct)
+                # print(thatProduct)
                 if product:
-                    for eachItem in eachOrder["orderedProducts"]:
-                        transaction_dict = {}
-                        title = eachItem["productTitle"]
-                        category = thatProduct["category"]
-                        quantity = eachItem["quantity"]
-                        address = eachOrder["address"]
-                        country = eachOrder["country"]
-                        time = eachOrder["createdAt"]
-                        price = int(thatProduct["price"]) * quantity
+                    transaction_dict = {}
+                    # print(eachItem)
+                    title = eachItem["productTitle"]
+                    category = thatProduct["category"]
+                    quantity = eachItem["quantity"]
+                    address = eachOrder["address"]
+                    country = eachOrder["country"]
+                    time = eachOrder["createdAt"]
+                    price = int(eachItem["price"])
+                    totalAmount = price * quantity
+                    orderEarned += totalAmount
 
-                        transaction_dict.update(
-                            {
-                                "title": title,
-                                "category": category,
-                                "quantity": quantity,
-                                "address": address,
-                                "country": country,
-                                "time": time,
-                                "price": price,
-                            }
-                        )
-
-                    print(transaction_dict)
-
+                    transaction_dict.update(
+                        {
+                            "title": title,
+                            "category": category,
+                            "quantity": quantity,
+                            "address": address,
+                            "country": country,
+                            "time": time,
+                            "price": price,
+                            "totalEarned": orderEarned,
+                        }
+                    )
+                    # print(transaction_dict)
                     transactionList.append(transaction_dict)
+                totalEarned += orderEarned
+
+    transactionList.append({"Earned": totalEarned})
 
     return transactionList
