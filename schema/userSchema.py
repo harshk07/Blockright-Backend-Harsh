@@ -161,6 +161,7 @@ def get_userRights(id):
                 "licenseTerm": cap_rights.get("licenseTerm", ""),
                 "licenseDate": cap_rights.get("licenseDate", ""),
                 "availableQuantity": AvailableQuantity.get("availableQuantity"),
+                "soldQuantity": AvailableQuantity.get("soldQuantity", 0),
             }
 
         if tshirt_rights_given:
@@ -177,6 +178,7 @@ def get_userRights(id):
                 "licenseTerm": tshirt_rights.get("licenseTerm", ""),
                 "licenseDate": tshirt_rights.get("licenseDate", ""),
                 "availableQuantity": AvailableQuantity.get("availableQuantity"),
+                "soldQuantity": AvailableQuantity.get("soldQuantity", 0),
             }
 
         if hoodie_rights_given:
@@ -193,6 +195,7 @@ def get_userRights(id):
                 "licenseTerm": hoodie_rights.get("licenseTerm", ""),
                 "licenseDate": hoodie_rights.get("licenseDate", ""),
                 "availableQuantity": AvailableQuantity.get("availableQuantity"),
+                "soldQuantity": AvailableQuantity.get("soldQuantity", 0),
             }
 
         if mug_rights_given:
@@ -209,6 +212,7 @@ def get_userRights(id):
                 "licenseTerm": mug_rights.get("licenseTerm", ""),
                 "licenseDate": mug_rights.get("licenseDate", ""),
                 "availableQuantity": AvailableQuantity.get("availableQuantity"),
+                "soldQuantity": AvailableQuantity.get("soldQuantity", 0),
             }
 
         user_rights = {
