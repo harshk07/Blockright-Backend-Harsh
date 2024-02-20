@@ -15,5 +15,6 @@ class ProductModel(BaseModel):
     discount: int
     totalQuantity: int
     availableQuantity: int
+    soldQuantity: int
     lastDate: datetime
     merchTitle: str

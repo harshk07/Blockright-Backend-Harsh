@@ -30,7 +30,11 @@ def post_userPayment(data):
                                 "availableQuantity": (
                                     thatProduct["availableQuantity"]
                                     - eachProduct["quantity"]
-                                )
+                                ),
+                                "soldQuantity": (
+                                    thatProduct["soldQuantity"]
+                                    + eachProduct["quantity"]
+                                ),
                             }
                         },
                     )
@@ -83,6 +87,7 @@ def get_transactionDetails(walletAddress):
                     title = eachItem["productTitle"]
                     category = thatProduct["category"]
                     quantity = eachItem["quantity"]
+                    city = eachOrder["city"]
                     address = eachOrder["address"]
                     country = eachOrder["country"]
                     time = eachOrder["createdAt"]
@@ -95,6 +100,7 @@ def get_transactionDetails(walletAddress):
                             "title": title,
                             "category": category,
                             "quantity": quantity,
+                            "city": city,
                             "address": address,
                             "country": country,
                             "time": time,
