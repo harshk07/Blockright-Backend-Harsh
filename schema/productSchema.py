@@ -2,51 +2,54 @@ from bson.objectid import ObjectId
 import json
 from datetime import datetime, date
 import secrets
+from model.product import ProductModel
+from config.db import *
+def post_adminProduct(admin_id: str, data: ProductModel):
+    # Convert ProductModel to dictionary
+    data_dict = data.dict()
 
+    # Check if admin exists
+    if not admin.find_one({"_id": ObjectId(admin_id)}):
+        raise HTTPException(status_code=404, detail="Invalid Admin ID")
 
-def post_adminProduct(id, data):
-    from config.db import product, admin, nft, user, rights
+    # Check if nft and user (walletId) exist
+    nft_data = nft.find_one({"_id": ObjectId(data_dict["nftId"])})
+    if not nft_data:
+        raise HTTPException(status_code=404, detail="Invalid NFT ID")
 
-    data = dict(data)
+    wallet_id = user.find_one({"_id": ObjectId(data_dict["walletId"])})
+    if not wallet_id:
+        raise HTTPException(status_code=404, detail="Invalid Wallet ID")
 
-    # Check if admin is there or not
-    if admin.find_one({"_id": ObjectId(id)}):
-        # Check if nft is there or not
-        nftData = nft.find_one({"_id": ObjectId(data["nftId"])})
-        walletId = user.find_one({"_id": ObjectId(data["walletId"])})
-
-        if nftData and walletId:
-            # Insert the new product
-            product.insert_one(data)
-
-            # Update the product with additional fields
-            product.update_one(
-                {"_id": ObjectId(data["_id"])},
-                {
-                    "$set": {
-                        "walletAddress": nftData["walletAddress"],
-                        "isPublished": bool(False),
-                        "isDeleted": bool(False),
-                        "drmNumber": secrets.token_hex(8),
-                    }
-                },
-            )
-
-            # Update rights document based on nftId
-            nft_id = data.get("nftId")
-            category = data.get("category")
-            if nft_id and category:
-                rights_field = f"{category.lower()}Rights"
-                rights.update_one(
-                    {"nftId": nft_id},
-                    {"$set": {f"{rights_field}.productId": str(data["_id"])}},
-                )
-
-            return "Product added successfully"
-        else:
-            return "Invalid NFT ID"
+    # Insert the new product
+    result = product.insert_one(data_dict)
+    if result.inserted_id:
+        product_id = str(result.inserted_id)
     else:
-        return "Invalid Admin ID"
+        raise HTTPException(status_code=500, detail="Failed to insert product")
+
+    # Update the product with additional fields
+    product.update_one(
+        {"_id": ObjectId(product_id)},
+        {
+            "$set": {
+                "walletAddress": nft_data["walletAddress"],
+                "isPublished": False,
+                "isDeleted": False,
+                "drmNumber": secrets.token_hex(8),
+            }
+        },
+    )
+
+    # Update rights document based on nftId
+    category = data_dict.get("category", "").lower()
+    rights_field = f"{category}Rights"
+    rights.update_one(
+        {"nftId": data_dict["nftId"]},
+        {"$set": {f"{rights_field}.productId": product_id}},
+    )
+
+    return "Product added successfully"
 
 
 def get_allProducts(id):
