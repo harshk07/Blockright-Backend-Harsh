@@ -3,8 +3,8 @@ import json
 import requests
 from datetime import datetime, date
 import secrets
-from config.db import payment, user, order, product
-
+from config.db import payment, user, order, product,nft
+from fastapi import HTTPException
 # def post_userLogin(data):
 #     from config.db import user, nft
 
@@ -47,30 +47,40 @@ from config.db import payment, user, order, product
 
 
 def post_userLogin(data):
-    from config.db import user, nft
-
-    # wallet_address = input("Enter wallet address: ")
-    api_key = "b7fb531b-40ef-4855-bcb0-56ff6374948f"
-
-    # Define the API endpoint URL
-    url = f"https://api.nftport.xyz/v0/accounts/{data.walletAddress}?chain=polygon"
+    # Define the API endpoint URL and API key
+    api_key = "krishnacool7_sk_y7r7ni208up5sd16h6987i2gs1w5zurc"
+    url = f"https://api.simplehash.com/api/v0/nfts/owners?chains=polygon,ethereum&wallet_addresses={data.walletAddress}&limit=50"
 
     # Define headers with the Authorization header
-    headers = {"Authorization": api_key, "Content-Type": "application/json"}
+    headers = {
+        "accept": "application/json",
+        "X-API-KEY": api_key,
+    }
 
     # Make a GET request with streaming
     response = requests.get(url, headers=headers, stream=True)
-    nftResponse = response.json()
-    Nfts = nftResponse["nfts"]
+    if response.status_code == 200:
+        nftResponse = response.json()
+        Nfts = nftResponse.get("nfts", [])
+    else:
+        response.raise_for_status()
 
-    # print(Nfts)
-    data = dict(data)
+    # Convert data to dictionary if it's not already
+    if not isinstance(data, dict):
+        data = data.dict()
 
     # Check if a user with the same wallet address already exists
     existing_user = user.find_one({"walletAddress": data["walletAddress"]})
 
     if existing_user:
-        # User already exists, return an appropriate response
+        # User already exists, update the number of NFTs
+        num_nfts = len(Nfts)
+        user.update_one(
+            {"walletAddress": data["walletAddress"]},
+            {"$set": {"numberOfNfts": num_nfts}}
+        )
+
+        # Return an appropriate response
         message = "User already exists"
         user_id = str(existing_user["_id"])
         nft_data = nft.find_one({"userID": user_id})
@@ -85,13 +95,14 @@ def post_userLogin(data):
             "nftProcessed": False,
             "dmActive": False,
             "refferaID": secrets.token_hex(6),
+            "numberOfNfts": len(Nfts),  # Add the number of NFTs
         }
         data.update(new_user)
         user_id = user.insert_one(data).inserted_id
 
         nft_ids = []
         for nft_metadata in Nfts:
-            if nft_metadata.get("cached_file_url") is not None:
+            if nft_metadata.get("image_url") is not None:
                 nft_doc = {
                     "userID": str(user_id),
                     "walletAddress": data["walletAddress"],
@@ -109,11 +120,10 @@ def post_userLogin(data):
                 nft_id = nft.insert_one(nft_doc).inserted_id
                 nft_ids.append(str(nft_id))
 
-        message = "Login Created Successfully"
-        response = {"message": message, "walletId": str(user_id), "nftIds": nft_ids}
+        response = {"message": "Login Created Successfully", "walletId": str(user_id), "nftIds": nft_ids}
         return response
     else:
-        return "Invalid Wallet Type"
+        raise HTTPException(status_code=400, detail="Invalid Wallet Type")
 
 
 def get_userRights(id):
